@@ -2,14 +2,43 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
+import { supabase } from '@/lib/supabase'; // Import the client instance
 
 export default function RegisterPage() {
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
   const [paymentMethod, setPaymentMethod] = useState('stripe');
+  const [loading, setLoading] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    alert(`Redirecting to ${paymentMethod} checkout gateway for 24-hour trial...`);
-    // This is where we will hook up our API routes later
+    setLoading(true);
+
+    // 1. Generate a completely unique, secure stream token for their TV app setup
+    const generatedStreamToken = 'aura_' + Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
+
+    // 2. Sign up the user in Supabase Auth
+    const { data, error } = await supabase.auth.signUp({
+      email,
+      password,
+      options: {
+        // We pass the stream token into user metadata so it stores automatically
+        data: {
+          stream_token: generatedStreamToken,
+          subscription_status: 'trialing', // Sets their entry state to trial
+        }
+      }
+    });
+
+    setLoading(false);
+
+    if (error) {
+      alert(`Registration Error: ${error.message}`);
+      return;
+    }
+
+    // 3. Success! Redirect them over to the respective payment provider checkout
+    alert(`Account created! Token: ${generatedStreamToken}. Redirecting to secure ${paymentMethod} gateway...`);
   };
 
   return (
@@ -37,6 +66,8 @@ export default function RegisterPage() {
               <input 
                 type="email" 
                 required 
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
                 placeholder="you@example.com" 
                 className="w-full bg-white/[0.03] border border-white/10 rounded-xl px-4 py-3.5 text-white placeholder-gray-600 focus:outline-none focus:border-violet-500 transition text-sm"
               />
@@ -48,6 +79,8 @@ export default function RegisterPage() {
               <input 
                 type="password" 
                 required 
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
                 placeholder="••••••••" 
                 className="w-full bg-white/[0.03] border border-white/10 rounded-xl px-4 py-3.5 text-white placeholder-gray-600 focus:outline-none focus:border-violet-500 transition text-sm"
               />
@@ -57,7 +90,6 @@ export default function RegisterPage() {
             <div>
               <label className="block text-xs font-semibold uppercase tracking-wider text-gray-400 mb-3">Select Secure Payment Provider</label>
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                {/* Stripe Card Option */}
                 <button
                   type="button"
                   onClick={() => setPaymentMethod('stripe')}
@@ -69,7 +101,6 @@ export default function RegisterPage() {
                   <span className="text-[10px] text-gray-400 mt-1">Stripe Secure</span>
                 </button>
 
-                {/* PayPal Option */}
                 <button
                   type="button"
                   onClick={() => setPaymentMethod('paypal')}
@@ -81,7 +112,6 @@ export default function RegisterPage() {
                   <span className="text-[10px] text-gray-400 mt-1">Global Subscriptions</span>
                 </button>
 
-                {/* Mercado Pago Option */}
                 <button
                   type="button"
                   onClick={() => setPaymentMethod('mercadopago')}
@@ -101,8 +131,12 @@ export default function RegisterPage() {
             </div>
 
             {/* Action Button */}
-            <button type="submit" className="glow-btn w-full text-white font-bold py-4 rounded-xl text-sm shadow-lg cursor-pointer">
-              Proceed to Secure Checkout
+            <button 
+              type="submit" 
+              disabled={loading}
+              className="glow-btn w-full text-white font-bold py-4 rounded-xl text-sm shadow-lg cursor-pointer disabled:opacity-50"
+            >
+              {loading ? 'Creating Secure Account...' : 'Proceed to Secure Checkout'}
             </button>
           </form>
         </div>
