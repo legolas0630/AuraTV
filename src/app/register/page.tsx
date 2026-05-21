@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
-import { supabase } from '@/lib/supabase'; // Import the client instance
+import { supabase } from '@/lib/supabase';
 
 export default function RegisterPage() {
   const [email, setEmail] = useState('');
@@ -18,27 +18,54 @@ export default function RegisterPage() {
     const generatedStreamToken = 'aura_' + Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
 
     // 2. Sign up the user in Supabase Auth
-    const { data, error } = await supabase.auth.signUp({
+    const { error } = await supabase.auth.signUp({
       email,
       password,
       options: {
-        // We pass the stream token into user metadata so it stores automatically
         data: {
           stream_token: generatedStreamToken,
-          subscription_status: 'trialing', // Sets their entry state to trial
+          subscription_status: 'trialing',
         }
       }
     });
 
-    setLoading(false);
-
     if (error) {
       alert(`Registration Error: ${error.message}`);
+      setLoading(false);
       return;
     }
 
-    // 3. Success! Redirect them over to the respective payment provider checkout
-    alert(`Account created! Token: ${generatedStreamToken}. Redirecting to secure ${paymentMethod} gateway...`);
+    // 3. AUTOMATED ROUTING GATEWAY
+    if (paymentMethod === 'mercadopago') {
+      try {
+        const res = await fetch('/api/checkout/mercadopago', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            email: email,
+            streamToken: generatedStreamToken,
+            currency: 'USD'
+          })
+        });
+
+        const paymentData = await res.json();
+        setLoading(false);
+
+        if (paymentData.init_point) {
+          // Immediate redirect to secure Mercado Pago Checkout
+          window.location.href = paymentData.init_point;
+        } else {
+          alert('Error initializing Mercado Pago gateway.');
+        }
+      } catch (paymentErr) {
+        console.error(paymentErr);
+        setLoading(false);
+        alert('Failed to connect to the billing microservice.');
+      }
+    } else {
+      setLoading(false);
+      alert(`Account created! Token: ${generatedStreamToken}. Processing secondary secure connection...`);
+    }
   };
 
   return (
@@ -90,6 +117,8 @@ export default function RegisterPage() {
             <div>
               <label className="block text-xs font-semibold uppercase tracking-wider text-gray-400 mb-3">Select Secure Payment Provider</label>
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                
+                {/* STRIPE */}
                 <button
                   type="button"
                   onClick={() => setPaymentMethod('stripe')}
@@ -101,17 +130,19 @@ export default function RegisterPage() {
                   <span className="text-[10px] text-gray-400 mt-1">Stripe Secure</span>
                 </button>
 
+                {/* CRYPTO */}
                 <button
                   type="button"
-                  onClick={() => setPaymentMethod('paypal')}
+                  onClick={() => setPaymentMethod('crypto')}
                   className={`p-4 border rounded-xl text-left flex flex-col justify-between transition cursor-pointer ${
-                    paymentMethod === 'paypal' ? 'border-blue-500 bg-blue-500/10' : 'border-white/10 bg-white/[0.01] hover:bg-white/[0.03]'
+                    paymentMethod === 'crypto' ? 'border-amber-500 bg-amber-500/10' : 'border-white/10 bg-white/[0.01] hover:bg-white/[0.03]'
                   }`}
                 >
-                  <span className="text-xs font-bold block text-white">PayPal</span>
-                  <span className="text-[10px] text-gray-400 mt-1">Global Subscriptions</span>
+                  <span className="text-xs font-bold block text-white">Cryptocurrency</span>
+                  <span className="text-[10px] text-gray-400 mt-1">BTC, ETH, USDT</span>
                 </button>
 
+                {/* MERCADO PAGO */}
                 <button
                   type="button"
                   onClick={() => setPaymentMethod('mercadopago')}
@@ -120,7 +151,7 @@ export default function RegisterPage() {
                   }`}
                 >
                   <span className="text-xs font-bold block text-white">Mercado Pago</span>
-                  <span className="text-[10px] text-gray-400 mt-1">Latin America AutoPay</span>
+                  <span className="text-[10px] text-gray-400 mt-1">LATAM Cards & Pix</span>
                 </button>
               </div>
             </div>
@@ -136,18 +167,18 @@ export default function RegisterPage() {
               disabled={loading}
               className="glow-btn w-full text-white font-bold py-4 rounded-xl text-sm shadow-lg cursor-pointer disabled:opacity-50"
             >
-              {loading ? 'Creating Secure Account...' : 'Proceed to Secure Checkout'}
+              {loading ? 'Processing Secure Connection...' : 'Proceed to Secure Checkout'}
             </button>
           </form>
         </div>
       </main>
 
-      {/* Security Footer */}
-      <footer className="py-6 border-t border-white/5 text-center text-xs text-gray-500 flex flex-col sm:flex-row items-center justify-center gap-2">
-        <span>🔒 256-Bit SSL Encrypted Connection</span>
-        <span className="hidden sm:inline">•</span>
-        <span>Compliant with PCI-DSS Standards</span>
-      </footer>
-    </div>
-  );
-}
+          {/* Security Footer */}
+          <footer className="py-6 border-t border-white/5 text-center text-xs text-gray-500 flex flex-col sm:flex-row items-center justify-center gap-2">
+            <span>🔒 256-Bit SSL Encrypted Connection</span>
+            <span className="hidden sm:inline">•</span>
+            <span>Compliant with PCI-DSS Standards</span>
+          </footer>
+        </div>
+      );
+    }
