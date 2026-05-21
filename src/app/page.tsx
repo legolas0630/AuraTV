@@ -9,9 +9,9 @@ export default function LandingPage() {
           AURA<span className="text-white">TV</span>
         </div>
         <nav className="hidden md:flex space-x-8 text-sm font-medium text-gray-400">
-          <a href="#features" className="hover:text-white transition">Features</a>
-          <a href="#channels" className="hover:text-white transition">Global Channels</a>
-          <a href="#pricing" className="hover:text-white transition">Pricing</a>
+          <a href="features" className="hover:text-white transition">Features</a>
+          <a href="channels" className="hover:text-white transition">Global Channels</a>
+          <a href="pricing" className="hover:text-white transition">Pricing</a>
         </nav>
         <Link href="/login" className="text-sm font-semibold border border-white/20 px-5 py-2 rounded-full hover:bg-white/5 transition">
           Sign In
