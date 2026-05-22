@@ -1,50 +1,52 @@
 import { NextResponse } from 'next/server';
 import Stripe from 'stripe';
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
-  apiVersion: '2025-02-24' as any, // Forzamos la API de Stripe estable
-});
+// Omitting apiVersion entirely lets Stripe fall back to your live account's pinned '2026-04-22.dahlia' version automatically
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!);
 
 export async function POST(request: Request) {
   try {
-    const { email, streamToken } = await request.json();
+    const { email, priceType, streamToken } = await request.json();
 
-    if (!email || !streamToken) {
-      return NextResponse.json({ error: 'Faltan parámetros de sesión.' }, { status: 400 });
+    if (!email || !priceType || !streamToken) {
+      return NextResponse.json({ error: 'Missing required validation fields.' }, { status: 400 });
     }
 
-    const origin = request.headers.get('origin') || 'https://auratv.vercel.app';
+    // Stripe live mode enforces minimum charge parameters ($0.50 USD / $10.00 MXN)
+    const isMonthly = priceType === 'monthly';
+    const unitAmount = isMonthly ? 999 : 100; // $9.99 for monthly, $1.00 for live micro-swipe authorization verification
+    const currencyCode = 'usd';
 
-    // Creamos la sesión de Stripe Checkout
     const session = await stripe.checkout.sessions.create({
       payment_method_types: ['card'],
       line_items: [
         {
           price_data: {
-            currency: 'usd',
+            currency: currencyCode,
             product_data: {
-              name: 'AuraTV Premium - Acceso Global de Transmisión',
-              description: 'Suscripción mensual con activación inmediata de playlist IPTV.',
+              name: isMonthly ? 'AuraTV Premium Monthly Suite' : 'AuraTV 24-Hour Ecosystem Test Voucher',
+              description: isMonthly 
+                ? 'Complete global Free-to-Air protocol network mapping access' 
+                : 'Temporary 24h testing gateway verification line',
             },
-            unit_amount: 999, // $9.99 USD expresado en centavos
+            unit_amount: unitAmount,
           },
           quantity: 1,
         },
       ],
       mode: 'payment',
-      customer_email: email,
-      // Inyectamos el stream token en los metadatos para recuperarlo en el webhook
+      success_url: `${request.headers.get('origin')}/dashboard?session_id={CHECKOUT_SESSION_ID}`,
+      cancel_url: `${request.headers.get('origin')}/pricing`,
       metadata: {
         stream_token: streamToken,
       },
-      success_url: `${origin}/dashboard?status=success`,
-      cancel_url: `${origin}/register?status=canceled`,
+      customer_email: email,
     });
 
     return NextResponse.json({ url: session.url });
 
-  } catch (error: any) {
-    console.error('Error creando sesión Stripe:', error);
-    return NextResponse.json({ error: 'Fallo interno en Stripe Checkout.' }, { status: 500 });
+  } catch (err: any) {
+    console.error('Error creating Stripe Session:', err.message);
+    return NextResponse.json({ error: `Error al inicializar Stripe Checkout: ${err.message}` }, { status: 500 });
   }
 }
