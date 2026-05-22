@@ -1,98 +1,176 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import Link from 'next/link';
 import { useApp } from '@/context/AppContext';
 
 export default function ChannelsPage() {
   const { lang } = useApp();
-  const [activeCategory, setActiveCategory] = useState('all');
-  const [activeRegion, setActiveRegion] = useState('all');
   const [searchQuery, setSearchQuery] = useState('');
+  const [activeCategory, setActiveCategory] = useState('all');
+  const [expandedCountries, setExpandedCountries] = useState<Record<string, boolean>>({
+    usa: true, // Default open the first one for visual guidance
+  });
 
   const content = {
     en: {
-      heroBadge: 'GLOBAL SPECTRUM INDEX',
-      title: 'Explore 15,000+ Native Streams.',
-      subtitle: 'Filter our global network array by region or broadcast package. Realtime edge nodes map high-bitrate feeds effortlessly to your player configuration.',
+      heroBadge: 'LIVE STREAM GRID LAYER',
+      title: 'Global Broadcast Directory',
+      subtitle: 'Browse thousands of live Free-to-Air index feeds synchronized directly from open-source network infrastructure pipelines.',
       searchPlaceholder: 'Search channels, networks, or countries...',
       allCats: 'All Categories',
       catSports: 'Sports Pack',
       catEnt: 'Entertainment & Movies',
       catNews: 'News Networks',
-      catDocs: 'Documentaries & Science',
-      allRegions: 'All Regions',
-      ctaTitle: 'Ready to Unlock the Full Global Broadcast Grid?',
-      ctaSubtitle: 'Instantly clear restrictions and map all 15,000+ live premium signals directly into your server token profile.',
-      ctaBtn: 'Secure Instant Access Now'
+      catDocs: 'Documentaries',
+      ctaTitle: 'Unlock the Entire 15,000+ Signal Matrix',
+      ctaSubtitle: 'Get automated M3U provisioning links and Xtream protocol credentials assigned directly to your private profile.',
+      ctaBtn: 'Secure My Subscription Node',
+      channelsLabel: 'channels online',
     },
     es: {
-      heroBadge: 'ÍNDICE DE ESPECTRO GLOBAL',
-      title: 'Explore más de 15,000 Señales Nativas.',
-      subtitle: 'Filtre nuestra matriz de transmisión global por región o paquete de programación. Los nodos perimetrales mapean transmisiones de alta tasa de bits sin esfuerzo.',
+      heroBadge: 'CAPA DE PARRILLA DE TRANSMISIÓN GLOBAL',
+      title: 'Directorio de Señales Globales',
+      subtitle: 'Explore miles de transmisiones de señal abierta (FTA) sincronizadas directamente desde canales de infraestructura de código abierto.',
       searchPlaceholder: 'Buscar canales, redes o países...',
       allCats: 'Todas las Categorías',
       catSports: 'Paquete Deportes',
       catEnt: 'Entretenimiento y Cine',
       catNews: 'Redes de Noticias',
-      catDocs: 'Documentales y Ciencia',
-      allRegions: 'Todas las Regiones',
-      ctaTitle: '¿Listo para Desbloquear la Parrilla de Canales Global?',
-      ctaSubtitle: 'Elimine las restricciones al instante y mapee más de 15,000 señales premium en vivo directamente en su perfil.',
-      ctaBtn: 'Obtener Acceso Instantáneo'
+      catDocs: 'Documentales',
+      ctaTitle: 'Desbloquee la Matriz Completa de 15,000+ Señales',
+      ctaSubtitle: 'Obtenga enlaces automáticos de aprovisionamiento M3U y credenciales de protocolo Xtream directamente en su perfil.',
+      ctaBtn: 'Asegurar Mi Nodo de Suscripción',
+      channelsLabel: 'canales en línea',
     }
   };
 
   const t = content[lang as 'en' | 'es'] || content.en;
 
-  // Master Highly Structured Global Channel Array
-  const masterChannels = [
-    // --- USA ---
-    { name: 'ESPN 1 & 2 Ultra HD', category: 'sports', region: 'usa', flag: '🇺🇸', quality: '4K' },
-    { name: 'HBO Premium East', category: 'entertainment', region: 'usa', flag: '🇺🇸', quality: '4K' },
-    { name: 'Discovery Channel HD', category: 'documentaries', region: 'usa', flag: '🇺🇸', quality: '1080p' },
-    { name: 'CNN International Live', category: 'news', region: 'usa', flag: '🇺🇸', quality: '1080p' },
-    
-    // --- UK ---
-    { name: 'Sky Sports Main Event HD', category: 'sports', region: 'uk', flag: '🇬🇧', quality: '4K' },
-    { name: 'BBC One HD London', category: 'entertainment', region: 'uk', flag: '🇬🇧', quality: '1080p' },
-    { name: 'Sky News UK Live', category: 'news', region: 'uk', flag: '🇬🇧', quality: '1080p' },
-    
-    // --- MEXICO ---
-    { name: 'TUDN Selecciones Premium', category: 'sports', region: 'mexico', flag: '🇲🇽', quality: '1080p' },
-    { name: 'Las Estrellas Internacional', category: 'entertainment', region: 'mexico', flag: '🇲🇽', quality: '1080p' },
-    { name: 'Azteca Uno HD', category: 'entertainment', region: 'mexico', flag: '🇲🇽', quality: '1080p' },
-    
-    // --- EL SALVADOR ---
-    { name: 'Canal 4 El Salvador (Deportes)', category: 'sports', region: 'salvador', flag: '🇸🇻', quality: '720p' },
-    { name: 'TCS Canal 2 HD', category: 'entertainment', region: 'salvador', flag: '🇸🇻', quality: '1080p' },
-    { name: 'Canal 21 Edición Central', category: 'news', region: 'salvador', flag: '🇸🇻', quality: '720p' },
-    
-    // --- BRAZIL ---
-    { name: 'TV Globo Premium', category: 'entertainment', region: 'brazil', flag: '🇧🇷', quality: '1080p' },
-    { name: 'SporTV Brazil HD', category: 'sports', region: 'brazil', flag: '🇧🇷', quality: '1080p' },
-    { name: 'GloboNews Ao Vivo', category: 'news', region: 'brazil', flag: '🇧🇷', quality: '720p' },
-    
-    // --- FRANCE ---
-    { name: 'Canal+ France Premium', category: 'entertainment', region: 'france', flag: '🇫🇷', quality: '1080p' },
-    { name: 'RMC Sport 1 HD', category: 'sports', region: 'france', flag: '🇫🇷', quality: '1080p' },
-    { name: 'France 24 Info Live', category: 'news', region: 'france', flag: '🇫🇷', quality: '1080p' },
-    
-    // --- MIDDLE EAST ---
-    { name: 'beIN Sports 1 Premium', category: 'sports', region: 'me', flag: '🇶🇦', quality: '4K' },
-    { name: 'MBC1 HD Premium', category: 'entertainment', region: 'me', flag: '🇦🇪', quality: '1080p' },
-    { name: 'Al Jazeera Arabic Live', category: 'news', region: 'me', flag: '🇶🇦', quality: '1080p' },
-    { name: 'National Geographic Abu Dhabi', category: 'documentaries', region: 'me', flag: '🇦🇪', quality: '1080p' },
-    
-    // --- ASIA ---
-    { name: 'NHK World Premium Tokyo', category: 'news', region: 'asia', flag: '🇯🇵', quality: '1080p' },
-    { name: 'Sony TEN 1 HD', category: 'sports', region: 'asia', flag: '🇮🇳', quality: '1080p' },
-    { name: 'CCTV News Mandarin', category: 'news', region: 'asia', flag: '🇨🇳', quality: '720p' },
-    
-    // --- AFRICA ---
-    { name: 'SuperSport Grandstand Africa', category: 'sports', region: 'africa', flag: '🇿🇦', quality: '1080p' },
-    { name: 'AfricaNews Live Network', category: 'news', region: 'africa', flag: '🇨🇬', quality: '720p' },
-    { name: 'CGTN Africa Feeds', category: 'documentaries', region: 'africa', flag: '🇰🇪', quality: '1080p' }
+  // Premium Multi-Country Directory Dataset Model (Vetted against iptv-org parameters)
+  const countryDirectory = [
+    {
+      id: 'usa',
+      name: 'United States',
+      flag: '🇺🇸',
+      channels: [
+        { name: 'ESPN Ultra HD', cat: 'sports', quality: '4K' },
+        { name: 'ABC News Live', cat: 'news', quality: '1080p' },
+        { name: 'HBO East Premium', cat: 'entertainment', quality: '4K' },
+        { name: 'CBS Sports Network', cat: 'sports', quality: '1080p' },
+        { name: 'Fox News Channel', cat: 'news', quality: '1080p' },
+        { name: 'Discovery Channel HD', cat: 'documentaries', quality: '1080p' },
+        { name: 'NBC News NOW', cat: 'news', quality: '1080p' },
+        { name: 'National Geographic HD', cat: 'documentaries', quality: '1080p' }
+      ]
+    },
+    {
+      id: 'uk',
+      name: 'United Kingdom',
+      flag: '🇬🇧',
+      channels: [
+        { name: 'Sky Sports Main Event', cat: 'sports', quality: '4K' },
+        { name: 'BBC One London HD', cat: 'entertainment', quality: '1080p' },
+        { name: 'Sky News UK', cat: 'news', quality: '1080p' },
+        { name: 'BBC News International', cat: 'news', quality: '1080p' },
+        { name: 'TNT Sports 1', cat: 'sports', quality: '1080p' },
+        { name: 'ITV 1 HD', cat: 'entertainment', quality: '1080p' }
+      ]
+    },
+    {
+      id: 'mexico',
+      name: 'México',
+      flag: '🇲🇽',
+      channels: [
+        { name: 'TUDN Premium México', cat: 'sports', quality: '1080p' },
+        { name: 'Las Estrellas HD', cat: 'entertainment', quality: '1080p' },
+        { name: 'Azteca Uno', cat: 'entertainment', quality: '1080p' },
+        { name: 'Foro TV Info', cat: 'news', quality: '720p' },
+        { name: 'Canal 5 HD', cat: 'entertainment', quality: '1080p' },
+        { name: 'Fox Sports Cono Norte', cat: 'sports', quality: '1080p' }
+      ]
+    },
+    {
+      id: 'salvador',
+      name: 'El Salvador',
+      flag: '🇸🇻',
+      channels: [
+        { name: 'Canal 4 El Salvador', cat: 'sports', quality: '720p' },
+        { name: 'TCS Canal 2 HD', cat: 'entertainment', quality: '1080p' },
+        { name: 'Canal 21 Telenoticias', cat: 'news', quality: '720p' },
+        { name: 'Canal 12 SV', cat: 'entertainment', quality: '720p' },
+        { name: 'Noticiero Hechos 12', cat: 'news', quality: '720p' }
+      ]
+    },
+    {
+      id: 'brazil',
+      name: 'Brazil',
+      flag: '🇧🇷',
+      channels: [
+        { name: 'TV Globo RJ HD', cat: 'entertainment', quality: '1080p' },
+        { name: 'SporTV Brazil Ultra', cat: 'sports', quality: '4K' },
+        { name: 'GloboNews Ao Vivo', cat: 'news', quality: '1080p' },
+        { name: 'Band Sports BR', cat: 'sports', quality: '1080p' },
+        { name: 'SBT HD Regional', cat: 'entertainment', quality: '1080p' }
+      ]
+    },
+    {
+      id: 'france',
+      name: 'France',
+      flag: '🇫🇷',
+      channels: [
+        { name: 'Canal+ France HD', cat: 'entertainment', quality: '1080p' },
+        { name: 'RMC Sport 1', cat: 'sports', quality: '1080p' },
+        { name: 'France 24 Info', cat: 'news', quality: '1080p' },
+        { name: 'TF1 Full HD', cat: 'entertainment', quality: '1080p' },
+        { name: 'BFM TV Live', cat: 'news', quality: '720p' }
+      ]
+    },
+    {
+      id: 'spain',
+      name: 'España',
+      flag: '🇪🇸',
+      channels: [
+        { name: 'La 1 HD RTVE', cat: 'entertainment', quality: '1080p' },
+        { name: 'Antena 3 Premium', cat: 'entertainment', quality: '1080p' },
+        { name: 'Movistar+ LaLiga', cat: 'sports', quality: '4K' },
+        { name: '24 Horas TVE', cat: 'news', quality: '720p' }
+      ]
+    },
+    {
+      id: 'me',
+      name: 'Middle East Network',
+      flag: '🇶🇦',
+      channels: [
+        { name: 'beIN Sports 1 Premium', cat: 'sports', quality: '4K' },
+        { name: 'Al Jazeera Arabic Live', cat: 'news', quality: '1080p' },
+        { name: 'MBC 1 HD Dubai', cat: 'entertainment', quality: '1080p' },
+        { name: 'Al Arabiya News', cat: 'news', quality: '1080p' },
+        { name: 'AD Sports 1 Premium', cat: 'sports', quality: '1080p' }
+      ]
+    },
+    {
+      id: 'asia',
+      name: 'Asia Collective (JP/IN/CN)',
+      flag: '🇯🇵',
+      channels: [
+        { name: 'NHK World Tokyo Premium', cat: 'news', quality: '1080p' },
+        { name: 'Sony TEN 1 HD India', cat: 'sports', quality: '1080p' },
+        { name: 'CCTV News Mandarin', cat: 'news', quality: '720p' },
+        { name: 'KBS World South Korea', cat: 'entertainment', quality: '1080p' }
+      ]
+    },
+    {
+      id: 'africa',
+      name: 'Africa Unified Feeds',
+      flag: '🇿🇦',
+      channels: [
+        { name: 'SuperSport Grandstand Africa', cat: 'sports', quality: '1080p' },
+        { name: 'AfricaNews Live Network', cat: 'news', quality: '720p' },
+        { name: 'SABC 1 HD South Africa', cat: 'entertainment', quality: '1080p' },
+        { name: 'Channels TV Nigeria', cat: 'news', quality: '720p' }
+      ]
+    }
   ];
 
   const categories = [
@@ -103,31 +181,30 @@ export default function ChannelsPage() {
     { id: 'documentaries', label: t.catDocs }
   ];
 
-  const regions = [
-    { id: 'all', label: t.allRegions },
-    { id: 'usa', label: '🇺🇸 USA' },
-    { id: 'uk', label: '🇬🇧 United Kingdom' },
-    { id: 'mexico', label: '🇲🇽 México' },
-    { id: 'salvador', label: '🇸🇻 El Salvador' },
-    { id: 'brazil', label: '🇧🇷 Brazil' },
-    { id: 'france', label: '🇫🇷 France' },
-    { id: 'me', label: '🕌 Middle East' },
-    { id: 'asia', label: '🌏 Asia Pack' },
-    { id: 'africa', label: '🌍 Africa Feeds' }
-  ];
+  const toggleCountry = (id: string) => {
+    setExpandedCountries((prev) => ({ ...prev, [id]: !prev[id] }));
+  };
 
-  // Pipeline Filter Logic
-  const filteredChannels = masterChannels.filter((chan) => {
-    const matchesCategory = activeCategory === 'all' || chan.category === activeCategory;
-    const matchesRegion = activeRegion === 'all' || chan.region === activeRegion;
-    const matchesSearch = chan.name.toLowerCase().includes(searchQuery.toLowerCase());
-    return matchesCategory && matchesRegion && matchesSearch;
-  });
+  // High-performance search and category filtering pipeline loop
+  const filteredDirectory = useMemo(() => {
+    return countryDirectory
+      .map((country) => {
+        const matchingChannels = country.channels.filter((chan) => {
+          const matchesCategory = activeCategory === 'all' || chan.cat === activeCategory;
+          const matchesSearch = chan.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
+                                country.name.toLowerCase().includes(searchQuery.toLowerCase());
+          return matchesCategory && matchesSearch;
+        });
+
+        return { ...country, channels: matchingChannels };
+      })
+      .filter((country) => country.channels.length > 0);
+  }, [searchQuery, activeCategory]);
 
   return (
     <div className="bg-[#f4f4f7] text-[#0a0a0c] dark:bg-[#060608] dark:text-[#f4f4f7] min-h-screen transition-colors duration-300 pb-1">
       
-      {/* HEADER HERO COVER */}
+      {/* CINEMATIC HERO COVER GRAPHIC */}
       <section className="relative w-full text-center px-6 pt-16 pb-12 bg-gradient-to-b from-black/5 via-transparent to-transparent dark:from-violet-950/10 dark:via-transparent">
         <div className="absolute top-8 left-1/2 -translate-x-1/2 w-[600px] h-[200px] bg-gradient-to-r from-violet-600/10 to-blue-600/10 rounded-full filter blur-[100px] pointer-events-none dark:opacity-60"></div>
         
@@ -144,22 +221,22 @@ export default function ChannelsPage() {
         </div>
       </section>
 
-      {/* SEARCH AND DOUBLE FILTER RADAR CONTROLLER */}
-      <section className="max-w-7xl mx-auto px-6 space-y-6">
+      {/* FILTER RADAR TOOLBAR CONTROL SYSTEM */}
+      <section className="max-w-5xl mx-auto px-6 space-y-6">
         
-        {/* Dynamic Glassmorphic Search Terminal Input */}
-        <div className="max-w-xl mx-auto relative group">
+        {/* Apple Style Floating Search Terminal Input */}
+        <div className="relative group max-w-2xl mx-auto">
           <span className="absolute left-4 top-1/2 -translate-y-1/2 opacity-40 text-sm">🔍</span>
           <input 
             type="text"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             placeholder={t.searchPlaceholder}
-            className="w-full bg-white/60 dark:bg-white/[0.01] backdrop-blur-xl border border-black/10 dark:border-white/10 rounded-2xl py-4 pl-12 pr-4 text-xs font-bold shadow-sm focus:outline-none focus:border-violet-500/50 transition-all text-inherit"
+            className="w-full bg-white/60 dark:bg-white/[0.01] backdrop-blur-xl border border-black/10 dark:border-white/10 rounded-2xl py-4 pl-12 pr-4 text-xs font-bold shadow-sm focus:outline-none focus:border-violet-500/50 text-inherit transition"
           />
         </div>
 
-        {/* 1. Category Filter Pill Deck */}
+        {/* Content Category Switcher Tabs */}
         <div className="flex flex-wrap justify-center gap-1.5 max-w-3xl mx-auto">
           {categories.map((cat) => (
             <button
@@ -168,7 +245,7 @@ export default function ChannelsPage() {
               className={`px-4 py-2 text-[11px] font-black tracking-wide rounded-xl transition-all cursor-pointer border ${
                 activeCategory === cat.id 
                   ? 'bg-violet-600 text-white border-violet-600 shadow-md' 
-                  : 'bg-white/50 dark:bg-white/[0.02] border-black/5 dark:border-white/5 text-gray-500 dark:text-gray-400 hover:text-inherit'
+                  : 'bg-white/50 dark:bg-white/[0.02] border-black/5 dark:border-white/5 text-gray-400 hover:text-inherit'
               }`}
             >
               {cat.label}
@@ -176,63 +253,74 @@ export default function ChannelsPage() {
           ))}
         </div>
 
-        {/* 2. Country/Region Dynamic Tray (Apple Style Horizontal Wrap) */}
-        <div className="w-full overflow-x-auto pb-2 scrollbar-none flex items-center justify-start md:justify-center gap-2 max-w-5xl mx-auto px-2">
-          {regions.map((reg) => (
-            <button
-              key={reg.id}
-              onClick={() => setActiveRegion(reg.id)}
-              className={`whitespace-nowrap px-3.5 py-1.5 text-[11px] font-bold rounded-lg transition-all cursor-pointer border ${
-                activeRegion === reg.id 
-                  ? 'border-violet-500/50 bg-violet-500/10 text-violet-600 dark:text-violet-400 font-extrabold shadow-sm' 
-                  : 'border-black/5 dark:border-white/5 bg-white/30 dark:bg-white/[0.005] text-gray-400 hover:text-inherit'
-              }`}
-            >
-              {reg.label}
-            </button>
-          ))}
-        </div>
-
       </section>
 
-      {/* CHANNELS GRID */}
-      <section className="max-w-7xl mx-auto px-6 py-8">
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-          {filteredChannels.map((chan, idx) => (
+      {/* NESTED COUNTRY DROPDOWN ACCORDION ARRAY LAYOUT */}
+      <section className="max-w-4xl mx-auto px-6 py-10 space-y-4">
+        {filteredDirectory.map((country) => {
+          const isOpen = !!expandedCountries[country.id];
+          return (
             <div 
-              key={idx} 
-              className="bg-white dark:bg-[#0c0c10] border border-black/5 dark:border-white/5 p-4 rounded-2xl flex items-center justify-between shadow-sm hover:border-violet-500/30 transition duration-200 group animate-fadeIn"
+              key={country.id} 
+              className="bg-white dark:bg-[#0c0c10] border border-black/5 dark:border-white/5 rounded-2xl overflow-hidden shadow-sm transition-all duration-200"
             >
-              <div className="flex items-center gap-3 overflow-hidden">
-                <span className="text-xl p-2 bg-black/5 dark:bg-white/5 rounded-xl block shrink-0 group-hover:scale-105 transition-transform">
-                  {chan.flag}
-                </span>
-                <span className="text-xs font-black tracking-tight text-gray-900 dark:text-white truncate">
-                  {chan.name}
-                </span>
-              </div>
-              <span className="text-[9px] font-black bg-violet-500/10 text-violet-600 dark:text-violet-400 px-2 py-0.5 border border-violet-500/20 rounded-md shrink-0 ml-2">
-                {chan.quality}
-              </span>
-            </div>
-          ))}
-        </div>
+              {/* Country Accordion Header Node Header */}
+              <button
+                onClick={() => toggleCountry(country.id)}
+                className="w-full flex items-center justify-between p-5 text-left font-black text-xs md:text-sm tracking-tight cursor-pointer hover:bg-black/[0.01] dark:hover:bg-white/[0.01] text-inherit transition select-none"
+              >
+                <div className="flex items-center gap-3">
+                  <span className="text-xl p-1 bg-black/5 dark:bg-white/5 rounded-lg block">{country.flag}</span>
+                  <span>{country.name}</span>
+                </div>
+                <div className="flex items-center gap-4 text-gray-400">
+                  <span className="text-[10px] font-bold lowercase opacity-70 bg-black/5 dark:bg-white/5 px-2 py-0.5 rounded-md">
+                    {country.channels.length} {t.channelsLabel}
+                  </span>
+                  <span className={`text-[10px] transition-transform duration-300 ${isOpen ? 'rotate-180' : ''}`}>
+                    ▼
+                  </span>
+                </div>
+              </button>
 
-        {/* Empty Search Fallback State */}
-        {filteredChannels.length === 0 && (
-          <div className="text-center py-20 text-xs font-bold text-gray-400">
-            No matching global feeds found inside chosen signal matrix parameters.
+              {/* Inner Expanded Channel Drawer Grid */}
+              {isOpen && (
+                <div className="border-t border-black/5 dark:border-white/5 p-4 bg-black/[0.005] dark:bg-black/20 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 animate-fadeIn">
+                  {country.channels.map((chan, idx) => (
+                    <div 
+                      key={idx} 
+                      className="bg-white dark:bg-[#111116] border border-black/5 dark:border-white/5 p-3.5 rounded-xl flex items-center justify-between shadow-xs"
+                    >
+                      <span className="text-xs font-bold text-gray-800 dark:text-gray-200 truncate pr-2">
+                        {chan.name}
+                      </span>
+                      <span className="text-[8px] font-black bg-violet-500/10 text-violet-600 dark:text-violet-400 px-2 py-0.5 border border-violet-500/20 rounded-md shrink-0">
+                        {chan.quality}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              )}
+
+            </div>
+          );
+        })}
+
+        {/* Empty Search Filter State Fallback */}
+        {filteredDirectory.length === 0 && (
+          <div className="text-center py-16 text-xs font-bold text-gray-400">
+            No global channels match your targeted filter criteria.
           </div>
         )}
       </section>
 
-      {/* MOVIELIKE HIGH-CONVERTING BOTTOM CTABOX ZONE */}
-      <section className="max-w-5xl mx-auto px-6 py-16">
-        <div className="relative w-full bg-gradient-to-br from-violet-600 to-blue-600 rounded-3xl p-8 md:p-14 text-center text-white space-y-6 shadow-2xl overflow-hidden group">
+      {/* CINEMATIC SUBSCRIPTION UPGRADE CTA BOX FOOTER ROW */}
+      <section className="max-w-4xl mx-auto px-6 py-12">
+        <div className="relative w-full bg-gradient-to-br from-violet-600 to-blue-600 rounded-3xl p-8 md:p-12 text-center text-white space-y-6 shadow-2xl overflow-hidden group">
           <div className="absolute inset-0 bg-radial-gradient from-white/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none"></div>
           
-          <div className="max-w-xl mx-auto space-y-3.5 z-10 relative">
-            <h2 className="text-xl md:text-4xl font-black tracking-tight leading-none">
+          <div className="max-w-xl mx-auto space-y-4 z-10 relative">
+            <h2 className="text-xl md:text-3xl font-black tracking-tight leading-none">
               {t.ctaTitle}
             </h2>
             <p className="text-[11px] md:text-xs text-white/80 font-medium leading-relaxed">
