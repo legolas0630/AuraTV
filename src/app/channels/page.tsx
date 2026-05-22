@@ -99,4 +99,36 @@ export default function ChannelsPage() {
               onClick={() => setActiveCategory(cat)}
               className={`px-4 py-2 text-xs font-bold rounded-lg transition-all cursor-pointer ${
                 activeCategory === cat 
-                  ? 'bg-white dark:bg-white/10 text-violet-600
+                  ? 'bg-white dark:bg-white/10 text-violet-600 dark:text-white shadow-sm' 
+                  : 'text-gray-500 dark:text-gray-400 hover:text-inherit'
+              }`}
+            >
+              {t[cat as keyof typeof t] as string}
+            </button>
+          ))}
+        </div>
+
+        {/* Channel Cards Grid */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+          {displayedChannels.map((chan, idx) => (
+            <div key={idx} className="bg-white dark:bg-white/[0.02] border border-black/5 dark:border-white/5 p-4 rounded-2xl flex items-center justify-between shadow-sm hover:border-violet-500/30 transition duration-150">
+              <div className="flex items-center gap-4">
+                <span className="text-2xl p-2.5 bg-black/5 dark:bg-white/5 rounded-xl">{chan.logo}</span>
+                <span className="text-xs font-bold tracking-tight">{chan.name}</span>
+              </div>
+              <span className="text-[10px] font-black uppercase tracking-wider bg-violet-500/10 text-violet-600 dark:text-violet-400 px-2.5 py-1 border border-violet-500/20 rounded-md">
+                {chan.quality}
+              </span>
+            </div>
+          ))}
+        </div>
+
+        <div className="text-center pt-8">
+          <Link href="/pricing" className="glow-btn px-8 py-4 rounded-xl text-xs font-bold text-white shadow-lg inline-block">
+            {t.cta}
+          </Link>
+        </div>
+      </main>
+    </div>
+  );
+}
