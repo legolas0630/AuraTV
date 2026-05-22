@@ -2,7 +2,8 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { AppProvider } from "@/context/AppContext";
-import GlobalHeader from "@/components/GlobalHeader"; // Standard alias clean resolution
+import GlobalHeader from "@/components/GlobalHeader";
+import GlobalFooter from "@/components/GlobalFooter"; // Mount footer wrapper reference
 
 const geistSans = Geist({ variable: "--font-geist-sans", subsets: ["latin"] });
 const geistMono = Geist_Mono({ variable: "--font-geist-mono", subsets: ["latin"] });
@@ -19,6 +20,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
         <AppProvider>
           <GlobalHeader />
           {children}
+          <GlobalFooter /> {/* Placed right beneath child components content block trees */}
         </AppProvider>
       </body>
     </html>

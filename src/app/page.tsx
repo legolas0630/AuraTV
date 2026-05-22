@@ -33,8 +33,7 @@ export default function HomePage() {
       moviesTitle: 'Premium Cinema Premiere',
       moviesDesc: 'On-demand Hollywood box office blockbusters with raw multi-channel audio tracks.',
       latamTitle: 'LATAM Regional Broadcast Network',
-      latamDesc: 'Local programming feeds serving high bit-rate native streams across South America.',
-      footerDesc: 'Next generation live television protocol network distribution platform.'
+      latamDesc: 'Local programming feeds serving high bit-rate native streams across South America.'
     },
     es: {
       heroTag: 'PORTAL DE OPTIMIZACIÓN GLOBAL DE TV Y VOD',
@@ -52,17 +51,15 @@ export default function HomePage() {
       moviesTitle: 'Estrenos de Cine Premium',
       moviesDesc: 'Películas de taquilla de Hollywood bajo demanda con pistas de audio multicanal crudas.',
       latamTitle: 'Red de Transmisión Regional LATAM',
-      latamDesc: 'Señales de programación local sirviendo transmisiones nativas de alta tasa de bits.',
-      footerDesc: 'Plataforma de distribución de red de protocolo de televisión en vivo de próxima generación.'
+      latamDesc: 'Señales de programación local sirviendo transmisiones nativas de alta tasa de bits.'
     }
   };
 
   const t = content[lang as 'en' | 'es'] || content.en;
 
   return (
-    <div className="min-h-screen bg-[#f4f4f7] text-[#0a0a0c] dark:bg-[#0a0a0c] dark:text-[#f4f4f7] flex flex-col justify-between transition-colors duration-200">
-      
-      <main className="flex-1 max-w-6xl mx-auto w-full px-6 flex flex-col items-center justify-center text-center py-12 md:py-24 space-y-12">
+    <div className="w-full">
+      <main className="max-w-6xl mx-auto w-full px-6 flex flex-col items-center justify-center text-center py-12 md:py-24 space-y-12">
         
         <span className="text-[10px] md:text-xs font-black tracking-widest uppercase bg-violet-500/10 text-violet-600 dark:text-violet-400 border border-violet-500/20 px-4 py-1.5 rounded-full shadow-sm animate-pulse">
           {t.heroTag}
@@ -85,7 +82,7 @@ export default function HomePage() {
           </Link>
         </div>
 
-        {/* GLASSMORPHISM SIGNAL MATRIX BOX */}
+        {/* OVERVIEW PANEL GRID */}
         <section className="w-full max-w-4xl bg-white/40 dark:bg-white/[0.01] backdrop-blur-xl border border-black/10 dark:border-white/10 rounded-3xl p-4 md:p-6 shadow-2xl text-left space-y-6 transition-all duration-300">
           
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-black/10 dark:border-white/5 pb-4">
@@ -117,39 +114,24 @@ export default function HomePage() {
             
             <div className="flex flex-col gap-2">
               <button 
-                type="button"
-                onClick={() => setActiveStream('sports')}
-                className={`p-4 rounded-xl text-left border transition-all cursor-pointer ${
-                  activeStream === 'sports' 
-                    ? 'border-violet-500 bg-violet-500/10 shadow-sm' 
-                    : 'border-black/5 dark:border-white/5 bg-white/30 dark:bg-white/[0.01] hover:bg-white/60 dark:hover:bg-white/[0.03]'
-                }`}
+                type="button" onClick={() => setActiveStream('sports')}
+                className={`p-4 rounded-xl text-left border transition-all cursor-pointer ${activeStream === 'sports' ? 'border-violet-500 bg-violet-500/10 shadow-sm' : 'border-black/5 dark:border-white/5 bg-white/30 dark:bg-white/[0.01] hover:bg-white/60 dark:hover:bg-white/[0.03]'}`}
               >
                 <span className="block text-xs font-black">⚽ Sports Pack</span>
                 <span className="text-[10px] text-gray-400 mt-0.5">4K HDR Live Signal</span>
               </button>
 
               <button 
-                type="button"
-                onClick={() => setActiveStream('movies')}
-                className={`p-4 rounded-xl text-left border transition-all cursor-pointer ${
-                  activeStream === 'movies' 
-                    ? 'border-violet-500 bg-violet-500/10 shadow-sm' 
-                    : 'border-black/5 dark:border-white/5 bg-white/30 dark:bg-white/[0.01] hover:bg-white/60 dark:hover:bg-white/[0.03]'
-                }`}
+                type="button" onClick={() => setActiveStream('movies')}
+                className={`p-4 rounded-xl text-left border transition-all cursor-pointer ${activeStream === 'movies' ? 'border-violet-500 bg-violet-500/10 shadow-sm' : 'border-black/5 dark:border-white/5 bg-white/30 dark:bg-white/[0.01] hover:bg-white/60 dark:hover:bg-white/[0.03]'}`}
               >
                 <span className="block text-xs font-black">🎬 Premium VOD</span>
                 <span className="text-[10px] text-gray-400 mt-0.5">Hollywood Library</span>
               </button>
 
               <button 
-                type="button"
-                onClick={() => setActiveStream('latam')}
-                className={`p-4 rounded-xl text-left border transition-all cursor-pointer ${
-                  activeStream === 'latam' 
-                    ? 'border-violet-500 bg-violet-500/10 shadow-sm' 
-                    : 'border-black/5 dark:border-white/5 bg-white/30 dark:bg-white/[0.01] hover:bg-white/60 dark:hover:bg-white/[0.03]'
-                }`}
+                type="button" onClick={() => setActiveStream('latam')}
+                className={`p-4 rounded-xl text-left border transition-all cursor-pointer ${activeStream === 'latam' ? 'border-violet-500 bg-violet-500/10 shadow-sm' : 'border-black/5 dark:border-white/5 bg-white/30 dark:bg-white/[0.01] hover:bg-white/60 dark:hover:bg-white/[0.03]'}`}
               >
                 <span className="block text-xs font-black">🇲🇽 LATAM Networks</span>
                 <span className="text-[10px] text-gray-400 mt-0.5">Regional Node Feeds</span>
@@ -185,19 +167,6 @@ export default function HomePage() {
           </div>
         </section>
       </main>
-
-      {/* FOOTER */}
-      <footer className="py-8 border-t border-black/5 dark:border-white/5 px-6 max-w-7xl mx-auto w-full flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-gray-400">
-        <div className="flex flex-col items-center sm:items-start gap-1">
-          <span className="font-bold text-gray-600 dark:text-gray-300">© {new Date().getFullYear()} AURA TV Ecosystem</span>
-          <span>{t.footerDesc}</span>
-        </div>
-        <div className="flex gap-6 font-semibold text-gray-500">
-          <Link href="/features" className="hover:text-violet-500">System</Link>
-          <Link href="/channels" className="hover:text-violet-500">Grid</Link>
-          <Link href="/pricing" className="hover:text-violet-500">SLA</Link>
-        </div>
-      </footer>
     </div>
   );
 }

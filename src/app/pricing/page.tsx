@@ -52,10 +52,8 @@ export default function PricingPage() {
   const currentText = pricingText[lang as 'en' | 'es'] || pricingText.en;
 
   return (
-    <div className="min-h-screen bg-[#f4f4f7] text-[#0a0a0c] dark:bg-[#0a0a0c] dark:text-[#f4f4f7] flex flex-col justify-between transition-colors duration-200">
-      
-      {/* CONTENIDO DE PRECIOS */}
-      <main className="flex-1 max-w-6xl mx-auto w-full px-6 py-12 md:py-20 space-y-16">
+    <div className="w-full">
+      <main className="max-w-6xl mx-auto w-full px-6 py-12 md:py-20 space-y-16">
         <div className="text-center max-w-2xl mx-auto space-y-4">
           <h1 className="text-3xl md:text-5xl font-black tracking-tight">{currentText.title}</h1>
           <p className="text-gray-500 dark:text-gray-400 text-sm md:text-base leading-relaxed">{currentText.subtitle}</p>
@@ -118,10 +116,6 @@ export default function PricingPage() {
           })}
         </div>
       </main>
-
-      <footer className="py-8 border-t border-black/5 dark:border-white/5 text-center text-xs text-gray-400">
-        © {new Date().getFullYear()} AURA TV Protocol. All Rights Reserved. Securing multi-currency localized frameworks.
-      </footer>
     </div>
   );
 }
