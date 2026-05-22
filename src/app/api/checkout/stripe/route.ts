@@ -1,7 +1,6 @@
 import { NextResponse } from 'next/server';
 import Stripe from 'stripe';
 
-// Omitting apiVersion entirely lets Stripe fall back to your live account's pinned '2026-04-22.dahlia' version automatically
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!);
 
 export async function POST(request: Request) {
@@ -12,9 +11,9 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Missing required validation fields.' }, { status: 400 });
     }
 
-    // Stripe live mode enforces minimum charge parameters ($0.50 USD / $10.00 MXN)
-    const isMonthly = priceType === 'monthly';
-    const unitAmount = isMonthly ? 999 : 100; // $9.99 for monthly, $1.00 for live micro-swipe authorization verification
+    // Mapping cents amount directly to your customized $4.99 & $14.99 parameters
+    const isPremium = priceType === 'premium';
+    const unitAmount = isPremium ? 1499 : 499; 
     const currencyCode = 'usd';
 
     const session = await stripe.checkout.sessions.create({
@@ -24,10 +23,10 @@ export async function POST(request: Request) {
           price_data: {
             currency: currencyCode,
             product_data: {
-              name: isMonthly ? 'AuraTV Premium Monthly Suite' : 'AuraTV 24-Hour Ecosystem Test Voucher',
-              description: isMonthly 
-                ? 'Complete global Free-to-Air protocol network mapping access' 
-                : 'Temporary 24h testing gateway verification line',
+              name: isPremium ? 'AuraTV Premium Ultra Suite' : 'AuraTV Basic Stream Membership',
+              description: isPremium 
+                ? 'Complete 15,000+ global directory, 4K loops, and Anti-Freeze 6.0 optimization.' 
+                : 'Essential streaming array covering 5,000+ regional channels in crisp HD.',
             },
             unit_amount: unitAmount,
           },
@@ -39,6 +38,7 @@ export async function POST(request: Request) {
       cancel_url: `${request.headers.get('origin')}/pricing`,
       metadata: {
         stream_token: streamToken,
+        price_type: priceType, // Passes 'basic' or 'premium' cleanly to the webhook array
       },
       customer_email: email,
     });

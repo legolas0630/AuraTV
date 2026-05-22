@@ -12,7 +12,8 @@ const translations = {
 };
 
 const currencySymbols = { USD: '$', EUR: '€', GBP: '£', MXN: '$' };
-const basePrices = { basic: 5.00, premium: 13.99 };
+// Micro-adjusted to matching industry standard high-conversion fractions
+const basePrices = { basic: 4.99, premium: 14.99 };
 const currencyRates = { USD: 1, EUR: 0.92, GBP: 0.78, MXN: 17.5 };
 
 const AppContext = createContext<any>(null);

@@ -23,14 +23,14 @@ export async function POST(request: Request) {
         process.env.STRIPE_WEBHOOK_SECRET || ''
       );
     } catch (err) {
-      // Fallback parser parsing mechanics
-      const parsed = JSON.parse(rawBody);
-      event = parsed;
+      // Fallback parsing mechanics if sandbox headers alter structures
+      event = JSON.parse(rawBody);
     }
 
     if (event.type === 'checkout.session.completed') {
       const session = event.data.object as Stripe.Checkout.Session;
       const userStreamToken = session.metadata?.stream_token;
+      const purchasedTier = session.metadata?.price_type; // Captures the 'basic' or 'premium' value flag
 
       if (userStreamToken) {
         const { data: { users }, error: authError } = await supabaseAdmin.auth.admin.listUsers();
@@ -39,13 +39,16 @@ export async function POST(request: Request) {
         const matchedUser = users.find(u => u.user_metadata?.stream_token === userStreamToken);
 
         if (matchedUser) {
+          // Conditionally map tier labels directly based on checkout metadata payload parameters
+          const targetStatus = purchasedTier === 'premium' ? 'Premium Active' : 'Basic Active';
+
           await supabaseAdmin.auth.admin.updateUserById(matchedUser.id, {
             user_metadata: {
               ...matchedUser.user_metadata,
-              subscription_status: 'Premium Active'
+              subscription_status: targetStatus
             }
           });
-          console.log(`[Stripe Webhook] Cloud verification complete. Line activated for: ${matchedUser.email}`);
+          console.log(`[Stripe Webhook] Cloud verification complete. Node activated for: ${matchedUser.email} on ${targetStatus}`);
         }
       }
     }
