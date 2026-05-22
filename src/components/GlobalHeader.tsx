@@ -11,7 +11,7 @@ export default function GlobalHeader() {
   const pathname = usePathname();
 
   // Hide header if inside dashboard panels
-  if (pathname.startsWith('/dashboard')) return null;
+
 
   const content = {
     en: {

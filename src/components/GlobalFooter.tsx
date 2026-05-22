@@ -9,7 +9,7 @@ export default function GlobalFooter() {
   const pathname = usePathname();
 
   // Guard Clause: Completely hide the public footer inside the user dashboard panel workspace
-  if (pathname.startsWith('/dashboard')) return null;
+
 
   const content = {
     en: {
