@@ -1,154 +1,135 @@
 'use client';
 
 import { useState } from 'react';
+import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { supabase } from '@/lib/supabase';
+import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
+import { useApp } from '@/context/AppContext';
 
 export default function RegisterPage() {
+  const { lang } = useApp();
+  const router = useRouter();
+  const supabase = createClientComponentClient();
+
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [paymentMethod, setPaymentMethod] = useState('stripe');
   const [loading, setLoading] = useState(false);
+  const [errorMessage, setErrorMessage] = useState('');
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const content = {
+    en: {
+      title: 'Create Your Account',
+      subtitle: 'Sign up for free instantly. You can choose to activate your streaming line directly from your dashboard inside.',
+      emailLabel: 'EMAIL ADDRESS',
+      passLabel: 'PASSWORD',
+      cta: 'Create Free Account',
+      haveAccount: 'Already have an account?',
+      signIn: 'Sign In here'
+    },
+    es: {
+      title: 'Crear tu Cuenta',
+      subtitle: 'Regístrate gratis al instante. Podrás elegir activar tu línea de transmisión directamente desde tu panel de control interior.',
+      emailLabel: 'CORREO ELECTRÓNICO',
+      passLabel: 'CONTRASEÑA',
+      cta: 'Crear Cuenta Gratis',
+      haveAccount: '¿Ya tienes una cuenta?',
+      signIn: 'Inicia Sesión aquí'
+    }
+  };
+
+  const t = content[lang as 'en' | 'es'] || content.en;
+
+  const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
+    setErrorMessage('');
 
-    // 1. Generar token único para el reproductor IPTV del usuario
-    const generatedStreamToken = 'aura_' + Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
+    // Generate a unique stream token identifying string upfront for their future playlist 
+    const generatedToken = 'ST_' + Math.random().toString(36).substr(2, 9).toUpperCase();
 
-    // 2. Registrar usuario en la base de datos de Supabase Auth
-    const { error } = await supabase.auth.signUp({
+    const { data, error } = await supabase.auth.signUp({
       email,
       password,
       options: {
+        // Embed the base metadata variables directly in the account schema profile
         data: {
-          stream_token: generatedStreamToken,
-          subscription_status: 'pending_payment', // Inicia retenido hasta que pague
+          stream_token: generatedToken,
+          subscription_status: 'Pending Activation'
         }
       }
     });
 
     if (error) {
-      alert(`Registration Error: ${error.message}`);
+      setErrorMessage(error.message);
       setLoading(false);
       return;
     }
 
-    // 3. ENRUTADOR DINÁMICO DE PASARELAS DE PAGO
-    if (paymentMethod === 'mercadopago') {
-      try {
-        const res = await fetch('/api/checkout/mercadopago', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ email, streamToken: generatedStreamToken, currency: 'USD' })
-        });
-        const paymentData = await res.json();
-        if (paymentData.init_point) window.location.href = paymentData.init_point;
-        else alert('Error en Mercado Pago.');
-      } catch (err) {
-        alert('Fallo de conexión en Mercado Pago.');
-      } finally { setLoading(false); }
-      
-    } else if (paymentMethod === 'stripe') {
-      try {
-        const res = await fetch('/api/checkout/stripe', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ email, streamToken: generatedStreamToken })
-        });
-        const paymentData = await res.json();
-        if (paymentData.url) window.location.href = paymentData.url; // Redirección a Stripe
-        else alert('Error al inicializar Stripe Checkout.');
-      } catch (err) {
-        alert('Fallo de conexión con el servidor de Stripe.');
-      } finally { setLoading(false); }
-      
-    } else {
-      // Flujo alternativo para Criptomonedas (Simulado de momento)
-      setLoading(false);
-      alert(`Cuenta creada! Token provisional: ${generatedStreamToken}. Envía tu pago a la wallet para activar.`);
-    }
+    // Auto-login or push straight to the dynamic gateway console dashboard
+    router.push('/dashboard');
   };
 
   return (
-    <div className="min-h-screen bg-[#0a0a0c] text-[#f4f4f7] flex flex-col justify-between">
-      <header className="px-6 py-6 border-b border-white/10 max-w-7xl mx-auto w-full flex justify-between items-center">
-        <Link href="/" className="text-xl font-black tracking-wider bg-gradient-to-r from-violet-500 to-blue-500 bg-clip-text text-transparent">
-          AURA<span className="text-white">TV</span>
-        </Link>
-        <span className="text-xs text-gray-500">Paso 1 de 2: Credenciales e Inicialización</span>
-      </header>
+    <div className="min-h-[85vh] bg-[#f4f4f7] text-[#0a0a0c] dark:bg-[#060608] dark:text-[#f4f4f7] flex items-center justify-center p-6 transition-colors duration-200">
+      <div className="w-full max-w-md bg-white dark:bg-[#0c0c10] border border-black/10 dark:border-white/5 rounded-3xl p-8 shadow-xl space-y-6">
+        
+        {/* Descriptive Headings */}
+        <div className="space-y-1.5 text-center">
+          <h1 className="text-2xl font-black tracking-tight">{t.title}</h1>
+          <p className="text-xs text-gray-400 font-medium leading-relaxed">{t.subtitle}</p>
+        </div>
 
-      <main className="flex-1 flex items-center justify-center p-6 my-8">
-        <div className="w-full max-w-xl bg-white/[0.02] border border-white/5 rounded-3xl p-8 md:p-10 shadow-2xl">
-          <div className="text-center mb-8">
-            <h2 className="text-2xl md:text-3xl font-extrabold mb-2">Activar Membresía Premium</h2>
-            <p className="text-gray-400 text-sm">Crea tus credenciales de acceso para la playlist global.</p>
+        {/* Form Entry Fieldsets */}
+        <form onSubmit={handleRegister} className="space-y-4">
+          <div className="space-y-1">
+            <label className="text-[10px] font-black tracking-wider text-gray-400 uppercase">{t.emailLabel}</label>
+            <input 
+              type="email"
+              required
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              placeholder="name@example.com"
+              className="w-full bg-black/5 dark:bg-white/[0.01] border border-black/10 dark:border-white/10 rounded-xl p-3.5 text-xs font-bold focus:outline-none focus:border-violet-500/50 text-inherit transition"
+            />
           </div>
 
-          <form onSubmit={handleSubmit} className="space-y-6">
-            <div>
-              <label className="block text-xs font-semibold uppercase tracking-wider text-gray-400 mb-2">Correo Electrónico</label>
-              <input 
-                type="email" required value={email} onChange={(e) => setEmail(e.target.value)} placeholder="tu@email.com" 
-                className="w-full bg-white/[0.03] border border-white/10 rounded-xl px-4 py-3.5 text-white placeholder-gray-600 focus:outline-none focus:border-violet-500 transition text-sm"
-              />
+          <div className="space-y-1">
+            <label className="text-[10px] font-black tracking-wider text-gray-400 uppercase">{t.passLabel}</label>
+            <input 
+              type="password"
+              required
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              placeholder="••••••••••••"
+              className="w-full bg-black/5 dark:bg-white/[0.01] border border-black/10 dark:border-white/10 rounded-xl p-3.5 text-xs font-bold focus:outline-none focus:border-violet-500/50 text-inherit transition"
+            />
+          </div>
+
+          {/* Error Message Anchor Banner */}
+          {errorMessage && (
+            <div className="p-3 bg-red-500/10 border border-red-500/20 text-red-600 dark:text-red-400 text-[11px] font-bold rounded-xl">
+              ⚠️ {errorMessage}
             </div>
+          )}
 
-            <div>
-              <label className="block text-xs font-semibold uppercase tracking-wider text-gray-400 mb-2">Contraseña</label>
-              <input 
-                type="password" required value={password} onChange={(e) => setPassword(e.target.value)} placeholder="••••••••" 
-                className="w-full bg-white/[0.03] border border-white/10 rounded-xl px-4 py-3.5 text-white placeholder-gray-600 focus:outline-none focus:border-violet-500 transition text-sm"
-              />
-            </div>
+          <button
+            type="submit"
+            disabled={loading}
+            className="glow-btn w-full py-4 text-xs font-black text-white uppercase tracking-widest rounded-xl shadow-xl transition cursor-pointer disabled:opacity-50"
+          >
+            {loading ? 'CREATING PROFILE ENVIRONMENT...' : t.cta}
+          </button>
+        </form>
 
-            <div>
-              <label className="block text-xs font-semibold uppercase tracking-wider text-gray-400 mb-3">Selecciona tu Proveedor de Pago Seguro</label>
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                <button
-                  type="button" onClick={() => setPaymentMethod('stripe')}
-                  className={`p-4 border rounded-xl text-left flex flex-col justify-between transition cursor-pointer ${paymentMethod === 'stripe' ? 'border-violet-500 bg-violet-500/10' : 'border-white/10 bg-white/[0.01]------------- hover:bg-white/[0.03]'}`}
-                >
-                  <span className="text-xs font-bold block text-white">Tarjetas</span>
-                  <span className="text-[10px] text-gray-400 mt-1">Stripe Global</span>
-                </button>
-
-                <button
-                  type="button" onClick={() => setPaymentMethod('crypto')}
-                  className={`p-4 border rounded-xl text-left flex flex-col justify-between transition cursor-pointer ${paymentMethod === 'crypto' ? 'border-amber-500 bg-amber-500/10' : 'border-white/10 bg-white/[0.01] hover:bg-white/[0.03]'}`}
-                >
-                  <span className="text-xs font-bold block text-white font-medium">Criptomonedas</span>
-                  <span className="text-[10px] text-gray-400 mt-1">BTC, USDT, ETH</span>
-                </button>
-
-                <button
-                  type="button" onClick={() => setPaymentMethod('mercadopago')}
-                  className={`p-4 border rounded-xl text-left flex flex-col justify-between transition cursor-pointer ${paymentMethod === 'mercadopago' ? 'border-cyan-500 bg-cyan-500/10' : 'border-white/10 bg-white/[0.01] hover:bg-white/[0.03]'}`}
-                >
-                  <span className="text-xs font-bold block text-white">Mercado Pago</span>
-                  <span className="text-[10px] text-gray-400 mt-1">LATAM & Pix</span>
-                </button>
-              </div>
-            </div>
-
-            <div className="bg-white/[0.01] border border-white/5 p-4 rounded-xl text-xs text-gray-400 leading-relaxed">
-              💡 <span className="text-white font-medium">Término de Servicio:</span> Al proceder estás autorizando una orden de facturación por un monto mensual de $9.99 USD (o equivalente local) cancelable en cualquier momento sin recargos adicionales desde tu panel.
-            </div>
-
-            <button type="submit" disabled={loading} className="glow-btn w-full text-white font-bold py-4 rounded-xl text-sm shadow-lg cursor-pointer disabled:opacity-50">
-              {loading ? 'Procesando Conexión Segura...' : 'Proceder al Pago Seguro'}
-            </button>
-          </form>
+        {/* Redirect Switch Footer Link */}
+        <div className="text-center pt-2 border-t border-black/5 dark:border-white/5 text-[11px] font-semibold text-gray-400">
+          {t.haveAccount}{' '}
+          <Link href="/login" className="text-violet-500 font-bold hover:underline">
+            {t.signIn}
+          </Link>
         </div>
-      </main>
 
-      <footer className="py-6 border-t border-white/5 text-center text-xs text-gray-500 flex flex-col sm:flex-row items-center justify-center gap-2">
-        <span>🔒 Conexión Encriptada SSL de 256 Bits</span>
-        <span className="hidden sm:inline">•</span>
-        <span>Normativa de Estándar de Seguridad PCI-DSS</span>
-      </footer>
+      </div>
     </div>
   );
 }
