@@ -284,6 +284,7 @@ export default function ChannelsPage() {
   return (
     <div className="bg-[#f4f4f7] text-[#0a0a0c] dark:bg-[#060608] dark:text-[#f4f4f7] min-h-screen transition-colors duration-300 pb-1">
       
+      {/* HEADER HERO AREA */}
       <section className="relative w-full text-center px-6 pt-12 pb-8 bg-gradient-to-b from-black/5 via-transparent to-transparent dark:from-violet-950/10 dark:via-transparent">
         <div className="absolute top-4 left-1/2 -translate-x-1/2 w-[600px] h-[150px] bg-gradient-to-r from-violet-600/10 to-blue-600/10 rounded-full filter blur-[100px] pointer-events-none dark:opacity-60"></div>
         <div className="max-w-3xl mx-auto space-y-3 relative z-10">
@@ -299,6 +300,7 @@ export default function ChannelsPage() {
         </div>
       </section>
 
+      {/* FIXED SCROLLING & GRID PACK FOR PILLS BLOCK */}
       <section className="max-w-4xl mx-auto px-6 space-y-4">
         <div className="relative group max-w-xl mx-auto">
           <span className="absolute left-4 top-1/2 -translate-y-1/2 opacity-40 text-sm">🔍</span>
@@ -310,12 +312,15 @@ export default function ChannelsPage() {
           />
         </div>
 
-        <div className="w-full overflow-x-auto pb-1 flex items-center justify-start md:justify-center gap-1.5 scrollbar-none px-2">
+        {/* 🛠️ ULTRAPREMIUM HYBRID TRACK SYSTEM (Locks horizontal on mobile, wraps centered on desktop) */}
+        <div className="w-full overflow-x-auto md:overflow-x-visible pb-2 md:pb-0 flex md:flex-wrap items-center justify-start md:justify-center gap-1.5 scrollbar-thin scrollbar-thumb-violet-600/10 px-2 touch-pan-x">
           {alphabet.map((letter) => (
             <button
               key={letter} onClick={() => setSelectedLetter(letter)}
-              className={`px-2.5 py-1.5 text-[10px] font-black rounded-lg transition cursor-pointer shrink-0 ${
-                selectedLetter === letter ? 'bg-violet-600 text-white shadow-md' : 'bg-white/40 dark:bg-white/[0.01] border border-black/5 dark:border-white/5 text-gray-400'
+              className={`px-3 py-2 text-[10px] font-black rounded-xl transition cursor-pointer shrink-0 min-w-[34px] text-center ${
+                selectedLetter === letter 
+                  ? 'bg-violet-600 text-white shadow-md' 
+                  : 'bg-white dark:bg-white/[0.02] border border-black/5 dark:border-white/5 text-gray-400 hover:text-inherit'
               }`}
             >
               {letter}
@@ -324,6 +329,7 @@ export default function ChannelsPage() {
         </div>
       </section>
 
+      {/* ACCORDION CONTAINER */}
       <section className="max-w-3xl mx-auto px-6 py-6 space-y-3">
         {filteredCountries.map((country) => {
           const isOpen = expandedCountry === country.name;
@@ -332,9 +338,9 @@ export default function ChannelsPage() {
               
               <button
                 onClick={() => setExpandedCountry(isOpen ? null : country.name)}
-                className="w-full flex items-center justify-between p-4 font-black text-xs cursor-pointer text-inherit transition"
+                className="w-full flex items-center justify-between p-4 font-black text-xs cursor-pointer text-inherit transition select-none"
               >
-                <div className="flex items-center gap-3">
+                <div className="flex items-center gap-3 overflow-hidden">
                   <span className="w-6 h-4 block shrink-0 overflow-hidden rounded bg-black/5 shadow-xs relative">
                     <img 
                       src={`https://flagcdn.com/w40/${country.code}.png`} 
@@ -343,10 +349,10 @@ export default function ChannelsPage() {
                       loading="lazy"
                     />
                   </span>
-                  <span>{country.name}</span>
+                  <span className="truncate">{country.name}</span>
                 </div>
-                <div className="flex items-center gap-3 text-gray-400">
-                  <span className="text-[9px] bg-black/5 dark:bg-white/5 px-2 py-0.5 rounded-md font-bold uppercase tracking-wider">
+                <div className="flex items-center gap-3 text-gray-400 shrink-0 ml-2">
+                  <span className="text-[9px] bg-black/5 dark:bg-white/5 px-2 py-0.5 rounded-md font-bold uppercase tracking-wider hidden sm:inline-block">
                     {t.channelsLabel}
                   </span>
                   <span className={`text-[9px] transition-transform duration-300 ${isOpen ? 'rotate-180' : ''}`}>▼</span>
@@ -355,7 +361,7 @@ export default function ChannelsPage() {
 
               {isOpen && (
                 <div className="border-t border-black/5 dark:border-white/5 p-4 bg-black/[0.005] dark:bg-black/20 space-y-3 animate-fadeIn">
-                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2">
                     {country.sample.map((channel, cIdx) => (
                       <div key={cIdx} className="bg-white dark:bg-[#111116] border border-black/5 dark:border-white/5 p-3 rounded-xl flex items-center justify-between shadow-xs">
                         <span className="text-xs font-bold text-gray-800 dark:text-gray-200 truncate pr-2">{channel}</span>
@@ -374,6 +380,7 @@ export default function ChannelsPage() {
         })}
       </section>
 
+      {/* CALL TO ACTION */}
       <section className="max-w-3xl mx-auto px-6 py-8">
         <div className="relative w-full bg-gradient-to-br from-violet-600 to-blue-600 rounded-3xl p-8 text-center text-white space-y-4 shadow-xl overflow-hidden group">
           <div className="max-w-xl mx-auto space-y-3 z-10 relative">
