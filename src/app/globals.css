@@ -1,13 +1,13 @@
 @import "tailwindcss";
 
-/* ⚡ ACTIVATE CLASS-BASED DARK MODE IN TAILWIND v4 */
+/* Activa el soporte para cambiar entre modo luz y oscuro por clase en Tailwind v4 */
 @custom-variant dark (&:where(.dark, .dark *));
 
-/* Your existing styles (like .glow-btn) can stay right below this */
 .glow-btn {
   background: linear-gradient(to right, #7c3aed, #2563eb);
   transition: all 0.3s ease;
 }
+
 .glow-btn:hover {
   box-shadow: 0 0 24px rgba(124, 58, 237, 0.4);
   filter: brightness(1.1);
