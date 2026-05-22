@@ -62,7 +62,6 @@ export default function HomePage() {
   return (
     <div className="min-h-screen bg-[#f4f4f7] text-[#0a0a0c] dark:bg-[#0a0a0c] dark:text-[#f4f4f7] flex flex-col justify-between transition-colors duration-200">
       
-      {/* HERO HERO HERO */}
       <main className="flex-1 max-w-6xl mx-auto w-full px-6 flex flex-col items-center justify-center text-center py-12 md:py-24 space-y-12">
         
         <span className="text-[10px] md:text-xs font-black tracking-widest uppercase bg-violet-500/10 text-violet-600 dark:text-violet-400 border border-violet-500/20 px-4 py-1.5 rounded-full shadow-sm animate-pulse">
@@ -86,7 +85,7 @@ export default function HomePage() {
           </Link>
         </div>
 
-        {/* INTERACTIVE STREAM PREVIEW PANEL */}
+        {/* GLASSMORPHISM SIGNAL MATRIX BOX */}
         <section className="w-full max-w-4xl bg-white/40 dark:bg-white/[0.01] backdrop-blur-xl border border-black/10 dark:border-white/10 rounded-3xl p-4 md:p-6 shadow-2xl text-left space-y-6 transition-all duration-300">
           
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-black/10 dark:border-white/5 pb-4">
@@ -118,6 +117,7 @@ export default function HomePage() {
             
             <div className="flex flex-col gap-2">
               <button 
+                type="button"
                 onClick={() => setActiveStream('sports')}
                 className={`p-4 rounded-xl text-left border transition-all cursor-pointer ${
                   activeStream === 'sports' 
@@ -130,6 +130,7 @@ export default function HomePage() {
               </button>
 
               <button 
+                type="button"
                 onClick={() => setActiveStream('movies')}
                 className={`p-4 rounded-xl text-left border transition-all cursor-pointer ${
                   activeStream === 'movies' 
@@ -142,6 +143,7 @@ export default function HomePage() {
               </button>
 
               <button 
+                type="button"
                 onClick={() => setActiveStream('latam')}
                 className={`p-4 rounded-xl text-left border transition-all cursor-pointer ${
                   activeStream === 'latam' 
