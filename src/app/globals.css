@@ -1,17 +1,14 @@
 @import "tailwindcss";
 
-@theme {
-  --color-background: #0a0a0c;
-  --color-foreground: #f4f4f7;
-}
+/* ⚡ ACTIVATE CLASS-BASED DARK MODE IN TAILWIND v4 */
+@custom-variant dark (&:where(.dark, .dark *));
 
-/* Custom AuraTV Utility Elements */
+/* Your existing styles (like .glow-btn) can stay right below this */
 .glow-btn {
-  background: linear-gradient(135deg, #7c3aed 0%, #2563eb 100%);
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  background: linear-gradient(to right, #7c3aed, #2563eb);
+  transition: all 0.3s ease;
 }
-
 .glow-btn:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 0 20px rgba(124, 58, 237, 0.5);
+  box-shadow: 0 0 24px rgba(124, 58, 237, 0.4);
+  filter: brightness(1.1);
 }
