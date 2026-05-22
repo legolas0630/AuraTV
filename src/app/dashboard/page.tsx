@@ -2,20 +2,23 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
+import { createClient } from '@supabase/supabase-js';
 import { useApp } from '@/context/AppContext';
+
+const supabase = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+);
 
 export default function DashboardPage() {
   const { lang, formatPrice } = useApp();
   const router = useRouter();
-  const supabase = createClientComponentClient();
   
   const [user, setUser] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [processingPayment, setProcessingPayment] = useState(false);
   const [selectedPlan, setSelectedPlan] = useState<'trial' | 'monthly'>('monthly');
 
-  // Fetch the current session and cloud metadata state on load
   useEffect(() => {
     async function getSession() {
       const { data: { session }, error } = await supabase.auth.getSession();
@@ -27,14 +30,13 @@ export default function DashboardPage() {
       setLoading(false);
     }
     getSession();
-  }, [router, supabase]);
+  }, [router]);
 
   const handleSignOut = async () => {
     await supabase.auth.signOut();
     router.push('/login');
   };
 
-  // Re-attempt checkout directly inside the dashboard using existing profile metadata
   const handleDashboardCheckout = async () => {
     setProcessingPayment(true);
     try {
@@ -50,7 +52,7 @@ export default function DashboardPage() {
 
       const data = await res.json();
       if (data.url) {
-        window.location.href = data.url; // Redirect cleanly to secure stripe gateway
+        window.location.href = data.url;
       } else {
         alert(lang === 'es' ? 'Error al redireccionar a la pasarela.' : 'Redirection failure to payment gateway.');
       }
@@ -69,7 +71,6 @@ export default function DashboardPage() {
     );
   }
 
-  // Check the cloud database subscription flag
   const isPremiumActive = user?.user_metadata?.subscription_status === 'Premium Active';
   const streamToken = user?.user_metadata?.stream_token || 'Not Generated';
 
@@ -77,7 +78,6 @@ export default function DashboardPage() {
     <div className="min-h-screen bg-[#f4f4f7] text-[#0a0a0c] dark:bg-[#060608] dark:text-[#f4f4f7] transition-colors duration-200 p-6">
       <div className="max-w-4xl mx-auto space-y-8 py-8">
         
-        {/* UPPER STATUS DASHBOARD HEADER */}
         <header className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-black/5 dark:border-white/5 pb-6">
           <div>
             <h1 className="text-xl font-black tracking-tight">
@@ -96,7 +96,6 @@ export default function DashboardPage() {
           </button>
         </header>
 
-        {/* ❌ STATE 1: PAYWALL GATED UPGRADE INTERFACE (Renders if user hasn't paid or checkout failed) */}
         {!isPremiumActive ? (
           <section className="bg-white dark:bg-[#0c0c10] border border-black/10 dark:border-white/5 rounded-3xl p-6 md:p-10 shadow-xl space-y-8 animate-fadeIn">
             
@@ -114,15 +113,12 @@ export default function DashboardPage() {
               </p>
             </div>
 
-            {/* Inner Dashboard Tier Selector Grid */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 max-w-2xl mx-auto">
               <button
                 type="button"
                 onClick={() => setSelectedPlan('trial')}
                 className={`p-5 rounded-2xl text-left border transition cursor-pointer ${
-                  selectedPlan === 'trial' 
-                    ? 'border-violet-500 bg-violet-500/10' 
-                    : 'border-black/5 dark:border-white/5 bg-black/[0.01] dark:bg-white/[0.005]'
+                  selectedPlan === 'trial' ? 'border-violet-500 bg-violet-500/10' : 'border-black/5 dark:border-white/5 bg-black/[0.01] dark:bg-white/[0.005]'
                 }`}
               >
                 <div className="flex items-center justify-between">
@@ -138,9 +134,7 @@ export default function DashboardPage() {
                 type="button"
                 onClick={() => setSelectedPlan('monthly')}
                 className={`p-5 rounded-2xl text-left border transition cursor-pointer ${
-                  selectedPlan === 'monthly' 
-                    ? 'border-violet-500 bg-violet-500/10' 
-                    : 'border-black/5 dark:border-white/5 bg-black/[0.01] dark:bg-white/[0.005]'
+                  selectedPlan === 'monthly' ? 'border-violet-500 bg-violet-500/10' : 'border-black/5 dark:border-white/5 bg-black/[0.01] dark:bg-white/[0.005]'
                 }`}
               >
                 <div className="flex items-center justify-between">
@@ -153,7 +147,6 @@ export default function DashboardPage() {
               </button>
             </div>
 
-            {/* Secure Re-attempt Checkout Submission Area */}
             <div className="max-w-xs mx-auto pt-2">
               <button
                 type="button"
@@ -170,10 +163,7 @@ export default function DashboardPage() {
           </section>
         ) : (
           
-          // ✅ STATE 2: FULLY UNLOCKED DASHBOARD CREDENTIALS (Renders if database reflects status 'Premium Active')
           <section className="space-y-6 animate-fadeIn">
-            
-            {/* Status Notification Alert Badge */}
             <div className="bg-emerald-500/10 border border-emerald-500/20 p-4 rounded-2xl flex items-center gap-3">
               <span className="h-2 w-2 rounded-full bg-emerald-500 animate-ping"></span>
               <p className="text-xs font-bold text-emerald-600 dark:text-emerald-400">
@@ -181,7 +171,6 @@ export default function DashboardPage() {
               </p>
             </div>
 
-            {/* M3U Output Board Card */}
             <div className="bg-white dark:bg-[#0c0c10] border border-black/5 dark:border-white/5 p-6 rounded-3xl space-y-4 shadow-sm">
               <div>
                 <h3 className="text-sm font-black uppercase tracking-wider text-gray-400">{lang === 'es' ? 'Su URL de Lista M3U Personalizada' : 'Your Custom M3U Playlist Link'}</h3>
@@ -201,7 +190,6 @@ export default function DashboardPage() {
               </div>
             </div>
 
-            {/* Xtream Alternative Access Layout Parameters */}
             <div className="bg-white dark:bg-[#0c0c10] border border-black/5 dark:border-white/5 p-6 rounded-3xl space-y-4 shadow-sm">
               <h3 className="text-sm font-black uppercase tracking-wider text-gray-400">{lang === 'es' ? 'Alternativa: Credenciales Xtream Codes' : 'Alternative: Xtream Codes API Protocol'}</h3>
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
@@ -220,7 +208,6 @@ export default function DashboardPage() {
               </div>
             </div>
 
-            {/* Educational Onboarding Video Setup Matrix */}
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
               <div className="bg-white dark:bg-[#0c0c10] border border-black/5 dark:border-white/5 p-5 rounded-2xl space-y-1">
                 <span className="text-xl block">🔥</span>

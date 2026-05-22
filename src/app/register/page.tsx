@@ -3,13 +3,18 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
+import { createClient } from '@supabase/supabase-js';
 import { useApp } from '@/context/AppContext';
+
+// Initializing using the native core client library
+const supabase = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+);
 
 export default function RegisterPage() {
   const { lang } = useApp();
   const router = useRouter();
-  const supabase = createClientComponentClient();
 
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -44,14 +49,12 @@ export default function RegisterPage() {
     setLoading(true);
     setErrorMessage('');
 
-    // Generate a unique stream token identifying string upfront for their future playlist 
     const generatedToken = 'ST_' + Math.random().toString(36).substr(2, 9).toUpperCase();
 
-    const { data, error } = await supabase.auth.signUp({
+    const { error } = await supabase.auth.signUp({
       email,
       password,
       options: {
-        // Embed the base metadata variables directly in the account schema profile
         data: {
           stream_token: generatedToken,
           subscription_status: 'Pending Activation'
@@ -65,7 +68,6 @@ export default function RegisterPage() {
       return;
     }
 
-    // Auto-login or push straight to the dynamic gateway console dashboard
     router.push('/dashboard');
   };
 
@@ -73,13 +75,11 @@ export default function RegisterPage() {
     <div className="min-h-[85vh] bg-[#f4f4f7] text-[#0a0a0c] dark:bg-[#060608] dark:text-[#f4f4f7] flex items-center justify-center p-6 transition-colors duration-200">
       <div className="w-full max-w-md bg-white dark:bg-[#0c0c10] border border-black/10 dark:border-white/5 rounded-3xl p-8 shadow-xl space-y-6">
         
-        {/* Descriptive Headings */}
         <div className="space-y-1.5 text-center">
           <h1 className="text-2xl font-black tracking-tight">{t.title}</h1>
           <p className="text-xs text-gray-400 font-medium leading-relaxed">{t.subtitle}</p>
         </div>
 
-        {/* Form Entry Fieldsets */}
         <form onSubmit={handleRegister} className="space-y-4">
           <div className="space-y-1">
             <label className="text-[10px] font-black tracking-wider text-gray-400 uppercase">{t.emailLabel}</label>
@@ -105,7 +105,6 @@ export default function RegisterPage() {
             />
           </div>
 
-          {/* Error Message Anchor Banner */}
           {errorMessage && (
             <div className="p-3 bg-red-500/10 border border-red-500/20 text-red-600 dark:text-red-400 text-[11px] font-bold rounded-xl">
               ⚠️ {errorMessage}
@@ -121,7 +120,6 @@ export default function RegisterPage() {
           </button>
         </form>
 
-        {/* Redirect Switch Footer Link */}
         <div className="text-center pt-2 border-t border-black/5 dark:border-white/5 text-[11px] font-semibold text-gray-400">
           {t.haveAccount}{' '}
           <Link href="/login" className="text-violet-500 font-bold hover:underline">
