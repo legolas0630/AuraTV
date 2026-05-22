@@ -1,6 +1,7 @@
 'use client';
 
 import { createContext, useContext, useState, useEffect } from 'react';
+import { usePathname } from 'next/navigation';
 
 const translations = {
   en: {
@@ -60,6 +61,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const [lang, setLang] = useState('en');
   const [currency, setCurrency] = useState('USD');
   const [mounted, setMounted] = useState(false);
+  const pathname = usePathname();
 
   useEffect(() => {
     setMounted(true);
@@ -89,33 +91,72 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     return `${currencySymbols[currency as 'USD' | 'EUR' | 'GBP' | 'MXN']}${computedPrice} ${currency}`;
   };
 
+  // Guard Clause: Hide the public floating dock inside the secure member dashboard area to prevent overlapping
+  const showFloatingDock = !pathname.startsWith('/dashboard');
+
   return (
     <AppContext.Provider value={{ theme, setTheme, lang, setLang, currency, setCurrency, t, formatPrice }}>
-      {/* This wrapper div forces Tailwind to recognize the theme class locally 
-        bypassing any missing configuration fields on the host system!
-      */}
       <div className={theme}>
         {children}
 
-        {/* FLOATING APPLE GLASSMORPHISM THEME TOGGLE CONTROLLER */}
-        <button
-          onClick={toggleTheme}
-          aria-label="Toggle Theme"
-          className="fixed bottom-6 right-6 z-50 p-3.5 rounded-full bg-white/10 dark:bg-black/20 backdrop-blur-xl border border-white/20 dark:border-white/10 shadow-[0_8px_32px_0_rgba(31,38,135,0.08)] dark:shadow-[0_8px_32px_0_rgba(0,0,0,0.4)] hover:scale-110 active:scale-95 hover:bg-white/20 dark:hover:bg-black/30 transition-all duration-300 cursor-pointer group flex items-center justify-center"
-        >
-          {theme === 'dark' ? (
-            // Elegant Minimalist Sun Vector Icon
-            <svg className="w-5 h-5 text-amber-400 drop-shadow-[0_0_8px_rgba(251,191,36,0.5)] transition-transform duration-500 group-hover:rotate-45" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-              <circle cx="12" cy="12" r="5" fill="currentColor" />
-              <path strokeLinecap="round" strokeLinejoin="round" d="M12 1v2m0 18v2M4.22 4.22l1.42 1.42m12.72 12.72l1.42 1.42M1 12h2m18 0h2M4.22 19.78l1.42-1.42m12.72-12.72l1.42-1.42" />
-            </svg>
-          ) : (
-            // Elegant Minimalist Crescent Moon Vector Icon
-            <svg className="w-5 h-5 text-indigo-900 transition-transform duration-500 group-hover:-rotate-12" fill="currentColor" viewBox="0 0 20 20">
-              <path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z" />
-            </svg>
-          )}
-        </button>
+        {/* UNIFIED FLOATING APPLE GLASSMORPHISM CONTROL DOCK */}
+        {showFloatingDock && (
+          <div className="fixed bottom-6 right-6 z-50 flex items-center gap-1.5 p-2 rounded-full bg-white/10 dark:bg-black/20 backdrop-blur-xl border border-white/25 dark:border-white/10 shadow-[0_8px_32px_0_rgba(31,38,135,0.06)] dark:shadow-[0_8px_32px_0_rgba(0,0,0,0.35)] hover:scale-[1.02] active:scale-100 transition-all duration-300 text-[#0a0a0c] dark:text-[#f4f4f7]">
+            
+            {/* Language Selector Container */}
+            <div className="relative flex items-center justify-center pl-2 rounded-full hover:bg-white/10 dark:hover:bg-white/5 transition-colors">
+              <select
+                value={lang}
+                onChange={(e) => setLang(e.target.value)}
+                className="appearance-none bg-transparent text-xs font-black py-1.5 pl-1.5 pr-5 focus:outline-none cursor-pointer text-inherit transition"
+              >
+                <option value="en" className="bg-[#f4f4f7] text-[#0a0a0c] dark:bg-[#0a0a0c] dark:text-[#f4f4f7] font-semibold">EN</option>
+                <option value="es" className="bg-[#f4f4f7] text-[#0a0a0c] dark:bg-[#0a0a0c] dark:text-[#f4f4f7] font-semibold">ES</option>
+              </select>
+              <span className="absolute right-1.5 top-1/2 -translate-y-1/2 text-[8px] pointer-events-none opacity-50">▼</span>
+            </div>
+
+            {/* Micro Splitter */}
+            <div className="w-[1px] h-3.5 bg-black/10 dark:bg-white/10 mx-0.5" />
+
+            {/* Currency Selector Container */}
+            <div className="relative flex items-center justify-center rounded-full hover:bg-white/10 dark:hover:bg-white/5 transition-colors">
+              <select
+                value={currency}
+                onChange={(e) => setCurrency(e.target.value)}
+                className="appearance-none bg-transparent text-xs font-black py-1.5 pl-3 pr-5 focus:outline-none cursor-pointer text-inherit transition"
+              >
+                <option value="USD" className="bg-[#f4f4f7] text-[#0a0a0c] dark:bg-[#0a0a0c] dark:text-[#f4f4f7] font-semibold">USD</option>
+                <option value="EUR" className="bg-[#f4f4f7] text-[#0a0a0c] dark:bg-[#0a0a0c] dark:text-[#f4f4f7] font-semibold">EUR</option>
+                <option value="GBP" className="bg-[#f4f4f7] text-[#0a0a0c] dark:bg-[#0a0a0c] dark:text-[#f4f4f7] font-semibold">GBP</option>
+                <option value="MXN" className="bg-[#f4f4f7] text-[#0a0a0c] dark:bg-[#0a0a0c] dark:text-[#f4f4f7] font-semibold">MXN</option>
+              </select>
+              <span className="absolute right-1.5 top-1/2 -translate-y-1/2 text-[8px] pointer-events-none opacity-50">▼</span>
+            </div>
+
+            {/* Micro Splitter */}
+            <div className="w-[1px] h-3.5 bg-black/10 dark:bg-white/10 mx-0.5" />
+
+            {/* Elegant Minimalist Theme Controller Toggle */}
+            <button
+              onClick={toggleTheme}
+              aria-label="Toggle System Visual Profile"
+              className="p-2 rounded-full hover:bg-white/15 dark:hover:bg-white/5 transition-all cursor-pointer flex items-center justify-center group"
+            >
+              {theme === 'dark' ? (
+                <svg className="w-4 h-4 text-amber-400 drop-shadow-[0_0_8px_rgba(251,191,36,0.4)] transition-transform duration-500 group-hover:rotate-45" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                  <circle cx="12" cy="12" r="5" fill="currentColor" />
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M12 1v2m0 18v2M4.22 4.22l1.42 1.42m12.72 12.72l1.42 1.42M1 12h2m18 0h2M4.22 19.78l1.42-1.42m12.72-12.72l1.42-1.42" />
+                </svg>
+              ) : (
+                <svg className="w-4 h-4 text-indigo-950 transition-transform duration-500 group-hover:-rotate-12" fill="currentColor" viewBox="0 0 20 20">
+                  <path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z" />
+                </svg>
+              )}
+            </button>
+
+          </div>
+        )}
       </div>
     </AppContext.Provider>
   );
